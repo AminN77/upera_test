@@ -3,4 +3,22 @@ services:
   product-service:
     build: ./product_service/
     container_name: prodcut-service
-    restart: always
+    environment:
+      API_PORT: ":3000"
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: "5432"
+      POSTGRES_USERNAME: "upera"
+      POSTGRES_PASSWORD: "1234"
+      POSTGRES_DB_NAME: "product-service-db"
+    depends_on:
+      - postgres
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    environment:
+      POSTGRES_DB: "product-service-db"
+      POSTGRES_USER: "upera"
+      POSTGRES_PASSWORD: "1234"
+    ports:
+      - "5432:5432"
