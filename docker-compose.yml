@@ -10,6 +10,8 @@ services:
       POSTGRES_USERNAME: "upera"
       POSTGRES_PASSWORD: "1234"
       POSTGRES_DB_NAME: "product-service-db"
+    ports:
+      - "3000:3000"
     depends_on:
       - postgres
 

@@ -1,6 +1,6 @@
-package event
+package internal
 
-type Publisher interface {
+type EventPublisher interface {
 	PublishCreatedEvent(e *ProductCreatedEvent) error
 	PublishUpdatedEvent(e *ProductUpdatedEvent) error
 }

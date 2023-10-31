@@ -1,13 +1,12 @@
-package event
+package internal
 
 import (
-	"github.com/AminN77/upera_test/product_service/internal"
 	"time"
 )
 
 type baseEvent struct {
 	CreatedAt time.Time
-	Data      *internal.Product
+	Data      *Product
 }
 
 type ProductCreatedEvent struct {
@@ -19,7 +18,7 @@ type ProductUpdatedEvent struct {
 	UpdatedAttrs []string
 }
 
-func NewProductCreatedEvent(p *internal.Product) *ProductCreatedEvent {
+func NewProductCreatedEvent(p *Product) *ProductCreatedEvent {
 	return &ProductCreatedEvent{
 		baseEvent: baseEvent{
 			CreatedAt: time.Now().UTC(),
@@ -28,7 +27,7 @@ func NewProductCreatedEvent(p *internal.Product) *ProductCreatedEvent {
 	}
 }
 
-func NewProductUpdatedEvent(p *internal.Product, updatedAttrs []string) *ProductUpdatedEvent {
+func NewProductUpdatedEvent(p *Product, updatedAttrs []string) *ProductUpdatedEvent {
 	return &ProductUpdatedEvent{
 		baseEvent: baseEvent{
 			CreatedAt: time.Now().UTC(),

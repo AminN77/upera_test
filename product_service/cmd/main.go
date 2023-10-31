@@ -1,9 +1,12 @@
 package main
 
 import (
-	"fmt"
+	"github.com/AminN77/upera_test/product_service/api/controller"
+	"github.com/AminN77/upera_test/product_service/cmd/setup"
+	"github.com/AminN77/upera_test/product_service/internal"
 	"github.com/joho/godotenv"
 	"log"
+	"os"
 )
 
 func main() {
@@ -12,5 +15,19 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println("Hello, World!")
+	// agent
+	repo := internal.NewPostgresRepository()
+	publisher := internal.NewMockEventPublisher()
+
+	// service & controller
+	srv := internal.NewService(repo, publisher)
+	con := controller.NewController(srv)
+
+	// setup router
+	router := setup.SetRouter(con)
+
+	// run
+	if err := router.Listen(os.Getenv("API_PORT")); err != nil {
+		log.Fatal(err)
+	}
 }

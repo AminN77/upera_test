@@ -2,13 +2,12 @@ package internal
 
 import (
 	"errors"
-	"github.com/AminN77/upera_test/product_service/internal/event"
 	"log"
 )
 
 var (
 	ErrRepo      = errors.New("some error with repository")
-	ErrPublisher = errors.New("some error with event pulisher")
+	ErrPublisher = errors.New("some error with event publisher")
 )
 
 // Service is the aggregator of the internal(domain) layer
@@ -18,10 +17,10 @@ type Service interface {
 
 type service struct {
 	repo      Repository
-	publisher event.Publisher
+	publisher EventPublisher
 }
 
-func NewService(repo Repository, publisher event.Publisher) Service {
+func NewService(repo Repository, publisher EventPublisher) Service {
 	return &service{
 		repo:      repo,
 		publisher: publisher,
@@ -34,7 +33,7 @@ func (s *service) Add(p *Product) error {
 		return ErrRepo
 	}
 
-	e := event.NewProductCreatedEvent(p)
+	e := NewProductCreatedEvent(p)
 
 	if err := s.publisher.PublishCreatedEvent(e); err != nil {
 		log.Println(err)

@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"log"
 	"os"
+	"time"
 )
 
 var (
@@ -52,7 +54,22 @@ func NewPostgresDb() (*gorm.DB, error) {
 		Plugins:           nil,
 	}
 
-	db, err := gorm.Open(postgres.New(pgConfig), &gConfig)
+	var db *gorm.DB
+	var err error
+
+	// retry to connect to database
+	for i := 1; i <= 10; i++ {
+		db, err = gorm.Open(postgres.New(pgConfig), &gConfig)
+		if err != nil {
+			log.Printf("Try %d couldn't connect to DB: %s", i, err.Error())
+			time.Sleep(3 * time.Second)
+			continue
+		} else {
+			log.Printf("Try %d connected to DB", i)
+			break
+		}
+	}
+
 	if err != nil {
 		return nil, ErrDatabaseConnection
 	}
