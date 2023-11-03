@@ -6,33 +6,36 @@ import (
 
 type baseEvent struct {
 	CreatedAt time.Time
-	Data      *Product
 }
 
 type ProductCreatedEvent struct {
 	baseEvent
+	Data *Product
 }
 
 type ProductUpdatedEvent struct {
 	baseEvent
 	UpdatedAttrs []string
+	Before       *Product
+	After        *Product
 }
 
 func NewProductCreatedEvent(p *Product) *ProductCreatedEvent {
 	return &ProductCreatedEvent{
 		baseEvent: baseEvent{
 			CreatedAt: time.Now().UTC(),
-			Data:      p,
 		},
+		Data: p,
 	}
 }
 
-func NewProductUpdatedEvent(p *Product, updatedAttrs []string) *ProductUpdatedEvent {
+func NewProductUpdatedEvent(before *Product, after *Product, updatedAttrs []string) *ProductUpdatedEvent {
 	return &ProductUpdatedEvent{
 		baseEvent: baseEvent{
 			CreatedAt: time.Now().UTC(),
-			Data:      p,
 		},
+		Before:       before,
+		After:        after,
 		UpdatedAttrs: updatedAttrs,
 	}
 }

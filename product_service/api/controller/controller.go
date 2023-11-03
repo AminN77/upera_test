@@ -19,8 +19,8 @@ func NewController(srv internal.Service) *Controller {
 }
 
 func (con *Controller) AddProduct(c *fiber.Ctx) error {
-	var request *dto.UpsertProductRequest
-	var response dto.BaseResponse
+	var request *dto.AddProductRequest
+	var response dto.Response[*internal.Product]
 
 	if err := c.BodyParser(&request); err != nil {
 		response.Status = http.StatusBadRequest
@@ -36,19 +36,21 @@ func (con *Controller) AddProduct(c *fiber.Ctx) error {
 		ImageUrl:    request.ImageUrl,
 	}
 
-	if err := con.srv.Add(p); err != nil {
+	res, err := con.srv.Add(p)
+	if err != nil {
 		response.Status = http.StatusInternalServerError
 		response.Message = err.Error()
 		return c.Status(response.Status).JSON(response)
 	}
 
 	response.Status = http.StatusCreated
+	response.Result = &res
 	return c.JSON(response)
 }
 
 func (con *Controller) UpdateProduct(c *fiber.Ctx) error {
-	var request *dto.UpsertProductRequest
-	var response dto.BaseResponse
+	var request *dto.UpdateProductRequest
+	var response dto.Response[*internal.Product]
 
 	if err := c.BodyParser(&request); err != nil {
 		response.Status = http.StatusBadRequest
@@ -69,15 +71,18 @@ func (con *Controller) UpdateProduct(c *fiber.Ctx) error {
 		Color:       request.Color,
 		Price:       request.Price,
 		ImageUrl:    request.ImageUrl,
+		Token:       request.Token,
 	}
 
-	if err := con.srv.Update(p, productID); err != nil {
+	res, err := con.srv.Update(p, productID)
+	if err != nil {
 		response.Status = http.StatusInternalServerError
 		response.Message = err.Error()
 		return c.Status(response.Status).JSON(response)
 	}
 
 	response.Status = http.StatusOK
+	response.Result = &res
 	return c.JSON(response)
 }
 

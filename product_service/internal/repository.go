@@ -3,6 +3,7 @@ package internal
 import (
 	"errors"
 	"github.com/AminN77/upera_test/product_service/pkg/postgres"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 	"log"
 )
@@ -17,7 +18,7 @@ var (
 // database from the domain
 type Repository interface {
 	Add(p *Product) (*Product, error)
-	Update(up *Product, id int) (*Product, []string, error)
+	Update(up *Product, id int) (*Product, *Product, []string, error)
 	Fetch(id int) (*Product, error)
 }
 
@@ -41,6 +42,7 @@ func NewPostgresRepository() Repository {
 }
 
 func (pr *postgresRepository) Add(p *Product) (*Product, error) {
+	p.Token, _ = uuid.NewUUID()
 	if err := pr.conn.Create(p).Error; err != nil {
 		log.Println("some database error occurred during add product, err:", err.Error())
 		return nil, ErrAddProduct
@@ -48,14 +50,22 @@ func (pr *postgresRepository) Add(p *Product) (*Product, error) {
 	return p, nil
 }
 
-func (pr *postgresRepository) Update(up *Product, id int) (*Product, []string, error) {
+func (pr *postgresRepository) Update(up *Product, id int) (*Product, *Product, []string, error) {
 	var existingProduct *Product
-	changes := make([]string, 0)
+	var beforeUpdate *Product
+	var changes []string
 
 	if err := pr.conn.First(&existingProduct, id).Error; err != nil {
 		log.Println("some database error occurred during fetch product, err:", err.Error())
-		return nil, changes, ErrUpdateProduct
+		return nil, nil, changes, ErrUpdateProduct
 	}
+
+	if up.Token != existingProduct.Token {
+		log.Println("the token is not correct for the product")
+		return nil, nil, changes, ErrUpdateProduct
+	}
+
+	beforeUpdate = existingProduct
 
 	if up.Name != "" && up.Name != existingProduct.Name {
 		existingProduct.Name = up.Name
@@ -82,12 +92,14 @@ func (pr *postgresRepository) Update(up *Product, id int) (*Product, []string, e
 		changes = append(changes, "ImageUrl")
 	}
 
+	existingProduct.Token, _ = uuid.NewUUID()
+
 	if err := pr.conn.Save(existingProduct).Error; err != nil {
 		log.Println("some database error occurred during update product, err:", err.Error())
-		return nil, changes, ErrUpdateProduct
+		return nil, nil, changes, ErrUpdateProduct
 	}
 
-	return existingProduct, changes, nil
+	return beforeUpdate, existingProduct, changes, nil
 }
 
 func (pr *postgresRepository) Fetch(id int) (*Product, error) {

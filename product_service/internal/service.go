@@ -2,7 +2,6 @@ package internal
 
 import (
 	"errors"
-	"github.com/google/uuid"
 	"log"
 )
 
@@ -13,8 +12,8 @@ var (
 
 // Service is the aggregator of the internal(domain) layer
 type Service interface {
-	Add(p *Product) error
-	Update(up *Product, id int) error
+	Add(p *Product) (*Product, error)
+	Update(up *Product, id int) (*Product, error)
 	Fetch(id int) (*Product, error)
 }
 
@@ -30,39 +29,38 @@ func NewService(repo Repository, publisher EventPublisher) Service {
 	}
 }
 
-func (s *service) Add(p *Product) error {
-	p.Token, _ = uuid.NewUUID()
+func (s *service) Add(p *Product) (*Product, error) {
 	createP, err := s.repo.Add(p)
 	if err != nil {
 		log.Println(err)
-		return ErrRepo
+		return nil, ErrRepo
 	}
 
 	e := NewProductCreatedEvent(createP)
 
 	if err := s.publisher.PublishCreatedEvent(e); err != nil {
 		log.Println(err)
-		return ErrPublisher
+		return nil, ErrPublisher
 	}
 
-	return nil
+	return p, nil
 }
 
-func (s *service) Update(up *Product, id int) error {
-	updatedP, changes, err := s.repo.Update(up, id)
+func (s *service) Update(up *Product, id int) (*Product, error) {
+	before, after, changes, err := s.repo.Update(up, id)
 	if err != nil {
 		log.Println(err)
-		return ErrRepo
+		return nil, ErrRepo
 	}
 
-	e := NewProductUpdatedEvent(updatedP, changes)
+	e := NewProductUpdatedEvent(before, after, changes)
 
 	if err := s.publisher.PublishUpdatedEvent(e); err != nil {
 		log.Println(err)
-		return ErrPublisher
+		return nil, ErrPublisher
 	}
 
-	return nil
+	return after, nil
 }
 
 func (s *service) Fetch(id int) (*Product, error) {
