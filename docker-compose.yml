@@ -14,6 +14,7 @@ services:
       - "3000:3000"
     depends_on:
       - postgres
+      - kafka-ui
 
   postgres:
     image: postgres
@@ -24,3 +25,23 @@ services:
       POSTGRES_PASSWORD: "1234"
     ports:
       - "5432:5432"
+
+  kafka1:
+    extends:
+      file: kafka-compose.yml
+      service: kafka1
+
+  kafka2:
+    extends:
+      file: kafka-compose.yml
+      service: kafka2
+
+  kafka-ui:
+    extends:
+      file: kafka-compose.yml
+      service: kafka-ui
+
+  zookeeper:
+    extends:
+      file: kafka-compose.yml
+      service: zookeeper
