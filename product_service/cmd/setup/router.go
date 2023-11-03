@@ -17,6 +17,8 @@ func SetRouter(c *controller.Controller) *fiber.App {
 	v1 := app.Group("/api/v1/product")
 	{
 		v1.Post("/", c.AddProduct)
+		v1.Put("/:id", c.UpdateProduct)
+		v1.Get("/:id", c.FetchProduct)
 	}
 
 	return app

@@ -9,14 +9,16 @@ import (
 
 var (
 	ErrAddProduct    = errors.New("could not add product")
+	ErrFetchProduct  = errors.New("could not fetch product")
 	ErrUpdateProduct = errors.New("could not update product")
 )
 
 // Repository interface is implementation of the famous repository pattern for decoupling the
 // database from the domain
 type Repository interface {
-	Add(p *Product) error
-	Update(p *Product) error
+	Add(p *Product) (*Product, error)
+	Update(up *Product, id int) (*Product, []string, error)
+	Fetch(id int) (*Product, error)
 }
 
 type postgresRepository struct {
@@ -38,18 +40,62 @@ func NewPostgresRepository() Repository {
 	}
 }
 
-func (pr *postgresRepository) Add(p *Product) error {
+func (pr *postgresRepository) Add(p *Product) (*Product, error) {
 	if err := pr.conn.Create(p).Error; err != nil {
-		log.Println("some database error occurred during add product, err:", err)
-		return ErrAddProduct
+		log.Println("some database error occurred during add product, err:", err.Error())
+		return nil, ErrAddProduct
 	}
-	return nil
+	return p, nil
 }
 
-func (pr *postgresRepository) Update(up *Product) error {
-	if err := pr.conn.Save(up).Error; err != nil {
-		log.Println("some database error occurred during update product, err:", err)
-		return ErrUpdateProduct
+func (pr *postgresRepository) Update(up *Product, id int) (*Product, []string, error) {
+	var existingProduct *Product
+	changes := make([]string, 0)
+
+	if err := pr.conn.First(&existingProduct, id).Error; err != nil {
+		log.Println("some database error occurred during fetch product, err:", err.Error())
+		return nil, changes, ErrUpdateProduct
 	}
-	return nil
+
+	if up.Name != "" && up.Name != existingProduct.Name {
+		existingProduct.Name = up.Name
+		changes = append(changes, "Name")
+	}
+
+	if up.Description != "" && up.Description != existingProduct.Description {
+		existingProduct.Description = up.Description
+		changes = append(changes, "Description")
+	}
+
+	if up.Price != 0 && up.Price != existingProduct.Price {
+		existingProduct.Price = up.Price
+		changes = append(changes, "Price")
+	}
+
+	if up.Color != "" && up.Color != existingProduct.Color {
+		existingProduct.Color = up.Color
+		changes = append(changes, "Color")
+	}
+
+	if up.ImageUrl != "" && up.ImageUrl != existingProduct.ImageUrl {
+		existingProduct.ImageUrl = up.ImageUrl
+		changes = append(changes, "ImageUrl")
+	}
+
+	if err := pr.conn.Save(existingProduct).Error; err != nil {
+		log.Println("some database error occurred during update product, err:", err.Error())
+		return nil, changes, ErrUpdateProduct
+	}
+
+	return existingProduct, changes, nil
+}
+
+func (pr *postgresRepository) Fetch(id int) (*Product, error) {
+	var product Product
+	if err := pr.conn.Where("id = ?", id).First(&product).Error; err != nil {
+		log.Println("some database error occurred during fetch product, err:", err.Error())
+		return nil, ErrFetchProduct
+	}
+
+	return &product, nil
 }

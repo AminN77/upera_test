@@ -1,6 +1,6 @@
 package dto
 
-type AddProductRequest struct {
+type UpsertProductRequest struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	Color       string `json:"color"`
