@@ -21,6 +21,19 @@ services:
       # - kafka1
       # - kafka2
 
+  history-service:
+    build: ./history_service/
+    container_name: history-service
+    environment:
+      API_PORT: ":3000"
+      MONGO_URL: "mongodb://mongo:27017"
+      MONGO_DB_NAME: "history-data-DB"
+      MONGO_COLLECTION_NAME: "history-data"
+    ports:
+      - "3001:3000"
+    depends_on:
+      - "mongo"
+
   postgres:
     image: postgres
     container_name: postgres
@@ -30,6 +43,12 @@ services:
       POSTGRES_PASSWORD: "1234"
     ports:
       - "5432:5432"
+
+  mongo:
+    image: "mongo:latest"
+    container_name: "mongo"
+    ports:
+      - "27017:27017"
 
   # kafka1:
   #   extends:
