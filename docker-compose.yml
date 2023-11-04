@@ -10,11 +10,16 @@ services:
       POSTGRES_USERNAME: "upera"
       POSTGRES_PASSWORD: "1234"
       POSTGRES_DB_NAME: "product-service-db"
+      KAFKA_URL: "0.0.0.0:29092,0.0.0.0:29093"
+      KAFKA_TOPIC: "upera"
+      KAFKA_UPDATE_P: "1"
+      KAFKA_CREATE_P: "0"
     ports:
       - "3000:3000"
     depends_on:
       - postgres
-      - kafka-ui
+      # - kafka1
+      # - kafka2
 
   postgres:
     image: postgres
@@ -26,22 +31,22 @@ services:
     ports:
       - "5432:5432"
 
-  kafka1:
-    extends:
-      file: kafka-compose.yml
-      service: kafka1
+  # kafka1:
+  #   extends:
+  #     file: kafka-compose.yml
+  #     service: kafka1
 
-  kafka2:
-    extends:
-      file: kafka-compose.yml
-      service: kafka2
+  # kafka2:
+  #   extends:
+  #     file: kafka-compose.yml
+  #     service: kafka2
 
-  kafka-ui:
-    extends:
-      file: kafka-compose.yml
-      service: kafka-ui
+  # kafka-ui:
+  #   extends:
+  #     file: kafka-compose.yml
+  #     service: kafka-ui
 
-  zookeeper:
-    extends:
-      file: kafka-compose.yml
-      service: zookeeper
+  # zookeeper:
+  #   extends:
+  #     file: kafka-compose.yml
+  #     service: zookeeper

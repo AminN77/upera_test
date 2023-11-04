@@ -17,7 +17,7 @@ func main() {
 
 	// agent
 	repo := internal.NewPostgresRepository()
-	publisher := internal.NewMockEventPublisher()
+	publisher := internal.NewKafkaEventPublisher()
 
 	// service & controller
 	srv := internal.NewService(repo, publisher)

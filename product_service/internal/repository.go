@@ -52,7 +52,7 @@ func (pr *postgresRepository) Add(p *Product) (*Product, error) {
 
 func (pr *postgresRepository) Update(up *Product, id int) (*Product, *Product, []string, error) {
 	var existingProduct *Product
-	var beforeUpdate *Product
+	var beforeUpdate Product
 	var changes []string
 
 	if err := pr.conn.First(&existingProduct, id).Error; err != nil {
@@ -65,7 +65,7 @@ func (pr *postgresRepository) Update(up *Product, id int) (*Product, *Product, [
 		return nil, nil, changes, ErrUpdateProduct
 	}
 
-	beforeUpdate = existingProduct
+	beforeUpdate = *existingProduct
 
 	if up.Name != "" && up.Name != existingProduct.Name {
 		existingProduct.Name = up.Name
@@ -99,7 +99,7 @@ func (pr *postgresRepository) Update(up *Product, id int) (*Product, *Product, [
 		return nil, nil, changes, ErrUpdateProduct
 	}
 
-	return beforeUpdate, existingProduct, changes, nil
+	return &beforeUpdate, existingProduct, changes, nil
 }
 
 func (pr *postgresRepository) Fetch(id int) (*Product, error) {
