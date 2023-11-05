@@ -21,7 +21,7 @@ type Repository interface {
 	// InsertBatch is more performant with bulk data
 	InsertBatch(r []*Revision) error
 
-	GetRevisionsOfOneProduct(productID int64, ctx context.Context) ([]*Revision, error)
+	GetRevisionsOfOneProduct(pageSize, pageIndex, productID int64, ctx context.Context) ([]*Revision, error)
 
 	GetRevisionByRevisionNumber(revisionNumber string, ctx context.Context) (*Revision, error)
 }
@@ -83,11 +83,15 @@ func (mr *mongoRepository) InsertBatch(r []*Revision) error {
 	return nil
 }
 
-func (mr *mongoRepository) GetRevisionsOfOneProduct(productID int64, ctx context.Context) ([]*Revision, error) {
+func (mr *mongoRepository) GetRevisionsOfOneProduct(pageSize, pageIndex, productID int64, ctx context.Context) ([]*Revision, error) {
 	var res []*Revision
 
 	filter := bson.M{"productID": productID}
-	opts := options.Find().SetSort(bson.M{"createdAt": -1})
+	opts := options.Find()
+	opts.SetSort(bson.M{"createdAt": -1})
+	skip := pageSize * (pageIndex - 1)
+	opts.Skip = &skip
+	opts.Limit = &pageSize
 
 	cursor, err := mr.collection.Find(ctx, filter, opts)
 	if err != nil {

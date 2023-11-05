@@ -17,7 +17,7 @@ func SetRouter(c *controller.Controller) *fiber.App {
 	v1 := app.Group("/api/v1/history")
 	{
 		v1.Get("/:productId/revision", c.FetchRevisionsOfOneProduct)
-		v1.Get("/:revisionId", c.FetchRevision)
+		v1.Get("/:revisionNumber", c.FetchRevision)
 	}
 
 	return app

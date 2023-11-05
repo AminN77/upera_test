@@ -17,6 +17,10 @@ func main() {
 	}
 
 	repo := internal.NewMongoRepository()
+	subscriber := internal.NewKafkaEventSubscriber(repo)
+	if err := subscriber.Subscribe(); err != nil {
+		log.Fatal(err)
+	}
 
 	// service & controller
 	srv := internal.NewService(repo)

@@ -21,14 +21,26 @@ func NewController(srv internal.Service) *Controller {
 
 func (con *Controller) FetchRevisionsOfOneProduct(c *fiber.Ctx) error {
 	var response dto.Response[[]*internal.Revision]
-	productID, err := strconv.Atoi(c.Params("productId"))
+	productID, err := strconv.ParseInt(c.Params("productId"), 10, 64)
+	if err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = err.Error()
+		return c.Status(response.Status).JSON(response)
+	}
+	pageSize, err := strconv.ParseInt(c.Query("pageSize"), 10, 64)
+	if err != nil {
+		response.Status = http.StatusBadRequest
+		response.Message = err.Error()
+		return c.Status(response.Status).JSON(response)
+	}
+	pageIndex, err := strconv.ParseInt(c.Query("pageIndex"), 10, 64)
 	if err != nil {
 		response.Status = http.StatusBadRequest
 		response.Message = err.Error()
 		return c.Status(response.Status).JSON(response)
 	}
 
-	res, err := con.srv.FetchRevisionsOfOneProduct(int64(productID), context.Background())
+	res, err := con.srv.FetchRevisionsOfOneProduct(pageSize, pageIndex, productID, context.Background())
 	if err != nil {
 		response.Status = http.StatusInternalServerError
 		response.Message = err.Error()
