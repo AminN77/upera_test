@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func NewConsumer() sarama.Consumer {
@@ -15,14 +16,26 @@ func NewConsumer() sarama.Consumer {
 
 	brokersList := strings.Split(kafkaConn, ",")
 
-	// Create a new Sarama configuration and set it to consume from the specified partition.
 	config := sarama.NewConfig()
 	config.Consumer.Return.Errors = true
 
-	// Create a new Kafka consumer and connect to the Kafka brokers.
-	consumer, err := sarama.NewConsumer(brokersList, config)
+	//retry
+	var consumer sarama.Consumer
+	var err error
+	for i := 1; i <= 10; i++ {
+		consumer, err = sarama.NewConsumer(brokersList, config)
+		if err != nil {
+			log.Printf("Try %d could not connect to kafka", i)
+			time.Sleep(3 * time.Second)
+			continue
+		} else {
+			log.Printf("Try %d connected to kafka", i)
+			break
+		}
+	}
+
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln(err)
 	}
 
 	return consumer

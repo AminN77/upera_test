@@ -77,6 +77,7 @@ func (kep *kafkaEventPublisher) PublishCreatedEvent(e *ProductCreatedEvent) erro
 		return ErrPublish
 	}
 
+	log.Println("new created event has been sent!")
 	return nil
 }
 
@@ -104,5 +105,6 @@ func (kep *kafkaEventPublisher) PublishUpdatedEvent(e *ProductUpdatedEvent) erro
 		return ErrPublish
 	}
 
+	log.Println("new updated event has been sent!")
 	return nil
 }

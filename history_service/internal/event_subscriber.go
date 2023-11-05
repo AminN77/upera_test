@@ -62,7 +62,7 @@ func (kes *kafkaEventSubscriber) startAgent() {
 
 	createConsumer, err := consumer.ConsumePartition(topic, int32(createP), sarama.OffsetNewest)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("created consumer ", err)
 	}
 	defer func() {
 		if err := createConsumer.Close(); err != nil {
@@ -72,7 +72,7 @@ func (kes *kafkaEventSubscriber) startAgent() {
 
 	updateConsumer, err := consumer.ConsumePartition(topic, int32(updateP), sarama.OffsetNewest)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal("updated consumer ", err)
 	}
 	defer func() {
 		if err := updateConsumer.Close(); err != nil {

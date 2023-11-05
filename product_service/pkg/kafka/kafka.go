@@ -5,16 +5,11 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 )
 
 func NewSyncProducer() sarama.SyncProducer {
 	kafkaConn := os.Getenv("KAFKA_URL")
-
-	//
-	log.Println(os.Getenv("KAFKA_URL"))
-	log.Println(os.Getenv("KAFKA_TOPIC"))
-	log.Println(os.Getenv("KAFKA_CREATE_P"))
-	//
 
 	if kafkaConn == "" {
 		log.Fatal("could not connect to kafka. KAFKA_URL is empty")
@@ -22,8 +17,22 @@ func NewSyncProducer() sarama.SyncProducer {
 
 	brokersList := strings.Split(kafkaConn, ",")
 	kafkaAdminConfig := sarama.NewConfig()
-	log.Println("before cluster admin")
-	kafkaAdminClient, err := sarama.NewClusterAdmin(brokersList, kafkaAdminConfig)
+
+	//retry
+	var kafkaAdminClient sarama.ClusterAdmin
+	var err error
+	for i := 1; i <= 10; i++ {
+		kafkaAdminClient, err = sarama.NewClusterAdmin(brokersList, kafkaAdminConfig)
+		if err != nil {
+			log.Printf("Try %d could not connect to kafka", i)
+			time.Sleep(3 * time.Second)
+			continue
+		} else {
+			log.Printf("Try %d connected to kafka", i)
+			break
+		}
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -38,15 +47,11 @@ func NewSyncProducer() sarama.SyncProducer {
 		log.Fatalln("KAFKA_TOPIC is empty")
 	}
 
-	log.Println("before topic")
-
 	if err := kafkaAdminClient.CreateTopic(topic, topicDetail, false); err != nil {
 		if !strings.ContainsAny(strings.ToLower(err.Error()), strings.ToLower("Topic with this name already exists")) {
 			log.Fatal(err)
 		}
 	}
-
-	log.Println("after topic")
 
 	producerConfig := sarama.NewConfig()
 	producerConfig.Producer.Return.Errors = true

@@ -10,7 +10,7 @@ services:
       POSTGRES_USERNAME: "upera"
       POSTGRES_PASSWORD: "1234"
       POSTGRES_DB_NAME: "product-service-db"
-      KAFKA_URL: "0.0.0.0:29092,0.0.0.0:29093"
+      KAFKA_URL: "kafka:9092"
       KAFKA_TOPIC: "upera"
       KAFKA_UPDATE_P: "1"
       KAFKA_CREATE_P: "0"
@@ -18,8 +18,7 @@ services:
       - "3000:3000"
     depends_on:
       - postgres
-      # - kafka1
-      # - kafka2
+      - kafka
 
   history-service:
     build: ./history_service/
@@ -29,10 +28,15 @@ services:
       MONGO_URL: "mongodb://mongo:27017"
       MONGO_DB_NAME: "history-data-DB"
       MONGO_COLLECTION_NAME: "history-data"
+      KAFKA_URL: "kafka:9092"
+      KAFKA_TOPIC: "upera"
+      KAFKA_UPDATE_P: "1"
+      KAFKA_CREATE_P: "0"
     ports:
       - "3001:3000"
     depends_on:
       - "mongo"
+      - "product-service"
 
   postgres:
     image: postgres
@@ -50,22 +54,19 @@ services:
     ports:
       - "27017:27017"
 
-  # kafka1:
-  #   extends:
-  #     file: kafka-compose.yml
-  #     service: kafka1
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+    ports:
+      - "2181:2181"
 
-  # kafka2:
-  #   extends:
-  #     file: kafka-compose.yml
-  #     service: kafka2
-
-  # kafka-ui:
-  #   extends:
-  #     file: kafka-compose.yml
-  #     service: kafka-ui
-
-  # zookeeper:
-  #   extends:
-  #     file: kafka-compose.yml
-  #     service: zookeeper
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
+    ports:
+      - "9092:9092"
+    depends_on:
+      - zookeeper

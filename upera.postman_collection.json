@@ -1,0 +1,194 @@
+{
+	"info": {
+		"_postman_id": "2e268d18-dc6a-406b-a664-cfd2c26ce865",
+		"name": "upera",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10730753"
+	},
+	"item": [
+		{
+			"name": "Add Product",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"ruler 3\",\n    \"description\": \"30cm ruler\",\n    \"color\": \"silver\",\n    \"price\": 350,\n    \"imageUrl\": \"http://someurl/someid\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{product}}/api/v1/product",
+					"host": [
+						"{{product}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"product"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update Product",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"ruler 3\",\n    \"description\": \"30cm ruler\",\n    \"color\": \"green\",\n    \"price\": 350,\n    \"imageUrl\": \"http://someurl/someid\",\n    \"token\" : \"7451375a-7b3d-11ee-a5bc-1afc20633765\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{product}}/api/v1/product/:id",
+					"host": [
+						"{{product}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"product",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch Product",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{product}}/api/v1/product/:id",
+					"host": [
+						"{{product}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"product",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch All Revisions of one product",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{history}}/api/v1/history/:productId/revision?pageSize=10&pageIndex=1",
+					"host": [
+						"{{history}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"history",
+						":productId",
+						"revision"
+					],
+					"query": [
+						{
+							"key": "pageSize",
+							"value": "10"
+						},
+						{
+							"key": "pageIndex",
+							"value": "1"
+						}
+					],
+					"variable": [
+						{
+							"key": "productId",
+							"value": "8"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Fetch Detail Of Specific Revision",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{history}}/api/v1/history/:revisionNumber",
+					"host": [
+						"{{history}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"history",
+						":revisionNumber"
+					],
+					"variable": [
+						{
+							"key": "revisionNumber",
+							"value": ""
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "product",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "history",
+			"value": "http://localhost:3001",
+			"type": "string"
+		}
+	]
+}
